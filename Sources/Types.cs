@@ -7,10 +7,13 @@ public partial class StreamItem {
 
     public String TokenId { get; init; }
 
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public String? Address { get; init; }
 
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public String? From { get; init; }
 
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public String? To { get; init; }
 
     ///
@@ -179,5 +182,86 @@ public sealed class Transfer: IStreamEvent {
         this.TokenId = tokenId;
         this.From = from;
         this.To = tokenId;
+    }
+}
+
+///
+
+public static partial class IStreamEventFunctions {
+
+    public static ErrorOr<StreamItem> ToStreamItem(
+        this IStreamEvent e) {
+
+        switch (e) {
+
+            case Mint mint: {
+
+                return new ErrorOr<StreamItem>(
+                    new StreamItem(
+                        type: "Burn", 
+                        tokenId: mint.TokenId,
+                        address: mint.Address,
+                        from: null,
+                        to: null));
+            }
+
+            case Burn burn: {
+
+                return new ErrorOr<StreamItem>(
+                    new StreamItem(
+                        type: "Burn",
+                        tokenId: burn.TokenId,
+                        address: null,
+                        from: null,
+                        to: null));
+            }
+
+            case Transfer transfer: {
+
+                return new ErrorOr<StreamItem>(
+                    new StreamItem(
+                        type: "Transfer",
+                        tokenId: transfer.TokenId,
+                        address: null,
+                        from: transfer.From,
+                        to: transfer.To));
+            }
+
+            default: {
+
+                return new ErrorOr<StreamItem>("unknown event type");
+            }
+        }
+    }
+
+    public static (List<StreamItem> items, Error?) ToStreamItems(
+        this List<IStreamEvent> events) {
+
+        Error? error = null;
+
+        var items = new List<StreamItem>();
+
+        for (var index = 0; index < events.Count; index++) {
+
+            var e = events[index];
+
+            var itemOrError = e.ToStreamItem();
+
+            if (itemOrError.Error is not null
+                || itemOrError.Value is null) {
+
+                error = error ??
+                    new Error(
+                        !IsNullOrWhiteSpace(itemOrError.Error?.Content)
+                        ? $"error convert item at index {index}: {itemOrError.Error?.Content}"
+                        : $"unknown error convert item at index {index}");
+
+                continue;
+            }
+
+            items.Add(itemOrError.Value);
+        }
+
+        return (items, error);
     }
 }

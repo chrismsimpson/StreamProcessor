@@ -135,7 +135,105 @@ public static partial class Program {
 
     ///
 
+    public static ErrorOrVoid ReadEventsIntoLedger(
+        String filename,
+        List<IStreamEvent> events) {
+
+        var path = Path.GetDirectoryName(filename);
+
+        if (!IsNullOrWhiteSpace(path) 
+            && path != ".") {
+
+            if (!Directory.Exists(path)) {
+
+                Directory.CreateDirectory(path);
+            }
+        }
+
+        ///
+
+        var ledgerOrError = OpenOrCreateLedger(filename);
+
+        if (ledgerOrError.Error is not null
+            || ledgerOrError.Value is null) {
+
+            return new ErrorOrVoid(ledgerOrError.Error?.Content ?? "unknown error");
+        }
+
+        var ledger = ledgerOrError.Value;
+
+        ///
+
+        var (items, err) = events.ToStreamItems();
+
+        if (err is not null) {
+
+            return new ErrorOrVoid(err.Content ?? "unknown error");
+        }
+
+        if (!items.Any()) {
+
+            // nothing to do
+
+            return new ErrorOrVoid();
+        }
+
+        foreach (var i in items) {
+
+            ledger.Add(i);
+        }
+
+        File.WriteAllText(
+            filename, 
+            JsonSerializer.Serialize(
+                ledger, 
+                new JsonSerializerOptions { WriteIndented = true }));
+
+        return new ErrorOrVoid();
+    }
+
+    public static ErrorOr<List<StreamItem>> OpenOrCreateLedger(
+        String filename) {
+
+        List<StreamItem> store;
+
+        if (!File.Exists(filename)) {
+
+            store = new List<StreamItem>();
+
+            File.WriteAllText(filename, JsonSerializer.Serialize(store));
+        }
+        else {
+
+            var contents = File.ReadAllText(filename);
+
+            if (IsNullOrWhiteSpace(contents)) {
+
+                return new ErrorOr<List<StreamItem>>("ledger is empty");
+            }
+
+            var itemsOrError = GetStreamItemsFromFilename(filename);
+
+            if (itemsOrError.Error is not null
+                || itemsOrError.Value is null) {
+
+                return new ErrorOr<List<StreamItem>>(itemsOrError.Error?.Content ?? "unknown error");
+            }
+
+            store = itemsOrError.Value;
+        }
+
+        return new ErrorOr<List<StreamItem>>(store);
+    }
+
+    ///
+
     public static int Main(String[] args) {
+
+        var ledgerFilename = args.ValueForKey("--ledger") ?? "./Store/ledger.json";
+        // var ledgerFilename = args.ValueForKey("--ledger") ?? "./ledger.json";
+
+        ///
 
         switch (true) {
 
@@ -158,6 +256,8 @@ public static partial class Program {
                     return 1;
                 }
 
+                ReadEventsIntoLedger(ledgerFilename, events);
+
                 return 0;
             }
 
@@ -172,6 +272,8 @@ public static partial class Program {
 
                     return 1;
                 }
+
+                ReadEventsIntoLedger(ledgerFilename, events);
 
                 return 0;
             }
