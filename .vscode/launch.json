@@ -7,7 +7,8 @@
             "request": "launch",
             "program": "${workspaceFolder}/Sources/bin/Debug/net6.0/StreamProcessor.dll",
             "args": [
-                
+                // "--read-file", "./Samples/singleTransaction.json"
+                "--read-file", "./Samples/transactions.json"
             ],
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
