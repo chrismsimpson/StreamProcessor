@@ -33,58 +33,114 @@ public static partial class Program {
         WriteLine($"sp: error: {message}");
     }
 
+    ///
+
+    public static ErrorOr<List<StreamItem>> GetStreamItemsFromFilename(
+        String filename) {
+
+        var contents = File.ReadAllText(filename);
+
+        if (IsNullOrWhiteSpace(contents)) {
+
+            return new ErrorOr<List<StreamItem>>($"file '{filename}' is empty");
+        }
+
+        return GetStreamItemsFromContents(contents, filename);
+    }
+
+    public static ErrorOr<List<StreamItem>> GetStreamItemsFromContents(
+        String contents,
+        String? filename = null) {
+
+        var _contents = contents;
+        
+        var peek = _contents.FirstOrDefault();
+
+        if (peek == '\'' 
+            && contents.LastOrDefault() == '\'') {
+
+            // Escape any single quotes
+
+            _contents = _contents.Substring(1, _contents.Length - 2);
+        
+            peek = _contents.FirstOrDefault();
+        }
+
+        switch (peek) {
+
+            case '[': {
+
+                var items = JsonSerializer.Deserialize<List<StreamItem>>(_contents);
+
+                return new ErrorOr<List<StreamItem>>(items);
+            }
+
+            case '{': {
+
+                var item = JsonSerializer.Deserialize<StreamItem>(_contents);
+
+                if (item is null) {
+
+                    return new ErrorOr<List<StreamItem>>(
+                        !IsNullOrWhiteSpace(filename)
+                            ? $"could not deserialize item from file '{filename}'"
+                            : "could not deserialize item from input");
+                } 
+
+                return new ErrorOr<List<StreamItem>>(new List<StreamItem>(new StreamItem[] { item }));
+            }
+
+            default: {
+
+                return new ErrorOr<List<StreamItem>>(
+                    !IsNullOrWhiteSpace(filename)
+                        ? $"'{filename}' does not appear to be valid json"
+                        : "input does not appear to be valid json");
+            }
+        }
+    }
+
+    ///
+
     public static int Main(String[] args) {
 
         switch (true) {
 
             case var _ when
-                args.ValueForKey("--read-file") is String file: {
+                args.ValueForKey("--read-file") is String filename: {
 
-                if (!File.Exists(file)) {
+                if (!File.Exists(filename)) {
 
-                    WriteErrorLine("file '{file}' does not exist");
+                    WriteErrorLine($"file '{filename}' does not exist");
 
                     return 1;
                 }
 
-                var contents = File.ReadAllText(file);
+                var itemsOrError = GetStreamItemsFromFilename(filename);
 
-                var peek = contents.FirstOrDefault();
+                if (itemsOrError.Error is not null
+                    || itemsOrError.Value is null) {
 
-                switch (peek) {
+                    WriteErrorLine(itemsOrError.Error?.Content ?? "unknown error");
 
-                    case '[': {
-
-                        var items = JsonSerializer.Deserialize<List<StreamItem>>(contents);
-
-                        return 0;
-                    }
-
-                    case '{': {
-
-                        var item = JsonSerializer.Deserialize<StreamItem>(contents);
-
-                        return 0;
-                    }
-
-                    default: {
-
-                        WriteErrorLine("'{file}' does not appear to be valid json");
-
-                        return 1;
-                    }
+                    return 1;
                 }
-                
 
-                // WriteLine($"TODO: read inline");
-                
-                // return 0;
+                return 0;
             }
 
             case var _ when
                 args.ValueForKey("--read-inline") is String inline: {
 
-                WriteLine($"TODO: read inline");
+                var itemsOrError = GetStreamItemsFromContents(inline);
+
+                if (itemsOrError.Error is not null
+                    || itemsOrError.Value is null) {
+
+                    WriteErrorLine(itemsOrError.Error?.Content ?? "unknown error");
+
+                    return 1;
+                }
 
                 return 0;
             }
