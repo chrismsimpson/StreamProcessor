@@ -102,6 +102,39 @@ public static partial class Program {
 
     ///
 
+    public static (List<IStreamEvent>, Error?) GetStreamEventsFromItems(
+        ErrorOr<List<StreamItem>> errorOrItems) {
+
+        if (errorOrItems.Error is not null) {
+
+            return (new (), errorOrItems.Error);
+        }
+
+        if (errorOrItems.Value is null) {
+
+            return (new (), null);
+        }
+
+        return errorOrItems.Value.ToStreamEvents();
+    }
+
+    public static (List<IStreamEvent>, Error?) GetStreamEventsFromFilename(
+        String filename) {
+
+        return GetStreamEventsFromItems(
+            GetStreamItemsFromFilename(filename));
+    }
+
+    public static (List<IStreamEvent>, Error?) GetStreamEventsFromContents(
+        String contents,
+        String? filename = null) {
+
+        return GetStreamEventsFromItems(
+            GetStreamItemsFromContents(contents, filename));
+    }
+
+    ///
+
     public static int Main(String[] args) {
 
         switch (true) {
@@ -116,12 +149,11 @@ public static partial class Program {
                     return 1;
                 }
 
-                var itemsOrError = GetStreamItemsFromFilename(filename);
+                var (events, err) = GetStreamEventsFromFilename(filename);
 
-                if (itemsOrError.Error is not null
-                    || itemsOrError.Value is null) {
+                if (err is not null) {
 
-                    WriteErrorLine(itemsOrError.Error?.Content ?? "unknown error");
+                    WriteErrorLine(err.Content ?? "unknown error");
 
                     return 1;
                 }
@@ -132,12 +164,11 @@ public static partial class Program {
             case var _ when
                 args.ValueForKey("--read-inline") is String inline: {
 
-                var itemsOrError = GetStreamItemsFromContents(inline);
+                var (events, err) = GetStreamEventsFromContents(inline);
 
-                if (itemsOrError.Error is not null
-                    || itemsOrError.Value is null) {
+                if (err is not null) {
 
-                    WriteErrorLine(itemsOrError.Error?.Content ?? "unknown error");
+                    WriteErrorLine(err.Content ?? "unknown error");
 
                     return 1;
                 }
