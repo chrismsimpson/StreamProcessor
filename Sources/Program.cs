@@ -47,6 +47,36 @@ public static partial class Program {
                 return 0;
             }
 
+            case var _ when
+                args.ValueForKey("--nft") is String nftId: {
+
+                // TODO: id validation?
+                
+                WriteLine($"TODO: nft id");
+
+                return 0;
+            }
+
+            case var _ when
+                args.ValueForKey("--wallet") is String address: {
+                
+                // TODO: address validation?
+
+                WriteLine($"TODO: wallet address");
+
+                return 0;
+            }
+
+            case var _ when
+                args.ValueForKey("--reset") is String address: {
+                
+                // TODO: address validation?
+
+                WriteLine($"TODO: reset");
+
+                return 0;
+            }
+            
             default: {
 
                 WriteLine($"TODO: write usage line");
@@ -54,7 +84,5 @@ public static partial class Program {
                 return 1;
             }
         }
-
-        // WriteLine("hello foo");
     }
 }
