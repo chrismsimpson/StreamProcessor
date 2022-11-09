@@ -556,5 +556,8 @@ Tasks:
   --nft TOKENID                 Display owner of TOKENID
   --wallet ADDRESS              Display contents of wallet ADDRESS
   --reset                       Reset the ledger
+
+Options:
+  --ledger FILE                 Specify a custom ledger file
 ";
 }
