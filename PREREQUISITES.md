@@ -1,0 +1,1 @@
+As this is a C# project, the latest dotnet (6.0) is obviously required.
