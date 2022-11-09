@@ -98,7 +98,7 @@ public static partial class StreamItemFunctions {
                     new Error(
                         !IsNullOrWhiteSpace(eventOrError.Error?.Content)
                             ? $"error at index {index}: {eventOrError.Error?.Content}"
-                            : $"unknown error at index: {index}");
+                            : $"unknown error at index {index}");
 
                 continue;
             }
@@ -198,7 +198,7 @@ public static partial class IStreamEventFunctions {
 
                 return new ErrorOr<StreamItem>(
                     new StreamItem(
-                        type: "Burn", 
+                        type: "Mint", 
                         tokenId: mint.TokenId,
                         address: mint.Address,
                         from: null,

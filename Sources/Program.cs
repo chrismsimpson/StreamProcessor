@@ -30,7 +30,71 @@ public static partial class Program {
     public static void WriteErrorLine(
         String message) {
 
+        var og = Console.ForegroundColor;
+
+        Console.ForegroundColor = ConsoleColor.Red;
+
         WriteLine($"sp: error: {message}");
+        
+        Console.ForegroundColor = og;
+    }
+
+    ///
+
+    public static ErrorOr<List<StreamItem>> OpenOrCreateStream(
+        String filename) {
+
+        var path = Path.GetDirectoryName(filename);
+
+        if (!IsNullOrWhiteSpace(path) 
+            && path != ".") {
+
+            if (!Directory.Exists(path)) {
+
+                Directory.CreateDirectory(path);
+            }
+        }
+
+        ///
+
+        List<StreamItem> store;
+
+        if (!File.Exists(filename)) {
+
+            store = new List<StreamItem>();
+
+            File.WriteAllText(filename, JsonSerializer.Serialize(store));
+        }
+        else {
+
+            var contents = File.ReadAllText(filename);
+
+            if (IsNullOrWhiteSpace(contents)) {
+
+                return new ErrorOr<List<StreamItem>>("ledger is empty");
+            }
+
+            var itemsOrError = GetStreamItemsFromFilename(filename);
+
+            if (itemsOrError.Error is not null
+                || itemsOrError.Value is null) {
+
+                return new ErrorOr<List<StreamItem>>(itemsOrError.Error?.Content ?? "unknown error");
+            }
+
+            store = itemsOrError.Value;
+        }
+
+        return new ErrorOr<List<StreamItem>>(store);
+    }
+
+    public static void ResetStream(
+        String filename) {
+
+        if (File.Exists(filename)) {
+
+            File.WriteAllText(filename, "[]");
+        }
     }
 
     ///
@@ -135,95 +199,224 @@ public static partial class Program {
 
     ///
 
-    public static ErrorOrVoid ReadEventsIntoLedger(
-        String filename,
-        List<IStreamEvent> events) {
+    public static ErrorOr<(List<StreamItem> Items, Dictionary<String, String> Ledger)> OpenOrCreateLedger(
+        String filename) {
 
-        var path = Path.GetDirectoryName(filename);
+        var streamOrError = OpenOrCreateStream(filename);
 
-        if (!IsNullOrWhiteSpace(path) 
-            && path != ".") {
+        if (streamOrError.Error is not null
+            || streamOrError.Value is null) {
 
-            if (!Directory.Exists(path)) {
+            return new ErrorOr<(List<StreamItem>, Dictionary<String, String>)>(streamOrError.Error?.Content ?? "unknown error");
+        }
 
-                Directory.CreateDirectory(path);
+        var stream = streamOrError.Value;
+
+        ///
+
+        var ledger = new Dictionary<String, String>();
+
+        for (var index = 0; index < stream.Count; index++) {
+
+            var item = stream[index];
+
+            var eventOrError = item.ToStreamEvent();
+
+            if (eventOrError.Error is not null
+                || eventOrError.Value is null) {
+
+                return new ErrorOr<(List<StreamItem>, Dictionary<String, String>)>(
+                    !IsNullOrWhiteSpace(eventOrError.Error?.Content)
+                        ? $"error in ledger at index {index}: {eventOrError.Error?.Content}"
+                        : $"unknown error in ledger at index {index}");
+            }
+
+            var err = ledger.ProcessEvent(eventOrError.Value);
+
+            if (err is not null) {
+
+                return new ErrorOr<(List<StreamItem>, Dictionary<String, String>)>(
+                    !IsNullOrWhiteSpace(err.Content)
+                        ? $"error loading ledger at index {index}: {err.Content}"
+                        : $"unknown error loading ledger at index {index}");
             }
         }
 
         ///
 
-        var ledgerOrError = OpenOrCreateLedger(filename);
+        return new ErrorOr<(List<StreamItem>, Dictionary<String, String>)>((stream, ledger));
+    }
 
-        if (ledgerOrError.Error is not null
-            || ledgerOrError.Value is null) {
+    /// 
 
-            return new ErrorOrVoid(ledgerOrError.Error?.Content ?? "unknown error");
+    public static Error? ProcessEvent(
+        this Dictionary<String, String> ledger,
+        IStreamEvent e) {
+
+        switch (e) {
+
+            case Mint mint: {
+
+                if (ledger.ContainsKey(mint.TokenId)) {
+
+                    return new Error($"attempt to mint an existing token");
+                }
+
+                ledger[mint.TokenId] = mint.Address;
+
+                return null;
+            }
+
+            case Burn burn: {
+
+                if (!ledger.ContainsKey(burn.TokenId)) {
+
+                    return new Error($"attempt to burn non existant token");
+                }
+
+                ledger.Remove(burn.TokenId);
+
+                return null;
+            }
+
+            case Transfer transfer: {
+
+                if (!ledger.ContainsKey(transfer.TokenId)) {
+
+                    return new Error($"attempt to transfer non existant token");
+                }
+
+                var currentOwner = ledger[transfer.TokenId];
+
+                if (currentOwner != transfer.From) {
+
+                    return new Error($"attempt to transfer unowned token");
+                }
+
+                ledger[transfer.TokenId] = transfer.To;
+
+                return null;
+            }
+
+            default: {
+
+                return new Error($"unknown event type");
+            }
         }
+    }
 
-        var ledger = ledgerOrError.Value;
+    ///
+
+    public static ErrorOr<int> ReadEventsIntoLedgerOrError(
+        String ledgerFilename,
+        List<IStreamEvent> events) {
+
+        var ledgerOrError = OpenOrCreateLedger(ledgerFilename);
+
+        if (ledgerOrError.Error is not null) {
+
+            return new ErrorOr<int>(ledgerOrError.Error?.Content ?? "unknown error");
+        }
 
         ///
 
-        var (items, err) = events.ToStreamItems();
+        var (stream, ledger) = ledgerOrError.Value;
 
-        if (err is not null) {
+        ///
 
-            return new ErrorOrVoid(err.Content ?? "unknown error");
+        var startCount = stream.Count;
+
+        ///
+
+        var (items, streamError) = events.ToStreamItems();
+
+        if (streamError is not null) {
+
+            return new ErrorOr<int>(streamError.Content ?? "unknown error");
         }
 
         if (!items.Any()) {
 
             // nothing to do
 
-            return new ErrorOrVoid();
+            return new ErrorOr<int>(0);
         }
 
-        foreach (var i in items) {
+        ///
 
-            ledger.Add(i);
+        for (var index = 0; index < events.Count; index++) {
+
+            var e = events[index];
+
+            ///
+
+            var itemOrError = e.ToStreamItem();
+
+            if (itemOrError.Error is not null
+                || itemOrError.Value is null) {
+
+                return new ErrorOr<int>(
+                    !IsNullOrWhiteSpace(itemOrError.Error?.Content)
+                        ? $"error re-serializing event at index {index}: {itemOrError.Error?.Content}"
+                        : $"unknown error re-serializing event at index {index}");
+            }
+
+            var item = itemOrError.Value;
+
+            ///
+
+            var ledgerError = ledger.ProcessEvent(e);
+
+            if (ledgerError is not null) {
+
+                return new ErrorOr<int>(
+                    !IsNullOrWhiteSpace(ledgerError.Content)
+                    ? $"error processing incoming event at index {index}: {ledgerError.Content}"
+                    : $"unknown error processing incoming event at index {index}");
+            }
+
+            ///
+
+            stream.Add(item);
         }
+
+        ///
 
         File.WriteAllText(
-            filename, 
+            ledgerFilename, 
             JsonSerializer.Serialize(
-                ledger, 
+                stream, 
                 new JsonSerializerOptions { WriteIndented = true }));
 
-        return new ErrorOrVoid();
+        return new ErrorOr<int>(stream.Count - startCount);
     }
 
-    public static ErrorOr<List<StreamItem>> OpenOrCreateLedger(
-        String filename) {
+    public static int ReadEventsIntoLedger(
+        String ledgerFilename,
+        (List<IStreamEvent> Events, Error? Error) eventsOrError) {
 
-        List<StreamItem> store;
+        if (eventsOrError.Error is not null) {
 
-        if (!File.Exists(filename)) {
+            WriteErrorLine(eventsOrError.Error.Content ?? "unknown error");
 
-            store = new List<StreamItem>();
-
-            File.WriteAllText(filename, JsonSerializer.Serialize(store));
-        }
-        else {
-
-            var contents = File.ReadAllText(filename);
-
-            if (IsNullOrWhiteSpace(contents)) {
-
-                return new ErrorOr<List<StreamItem>>("ledger is empty");
-            }
-
-            var itemsOrError = GetStreamItemsFromFilename(filename);
-
-            if (itemsOrError.Error is not null
-                || itemsOrError.Value is null) {
-
-                return new ErrorOr<List<StreamItem>>(itemsOrError.Error?.Content ?? "unknown error");
-            }
-
-            store = itemsOrError.Value;
+            return 1;
         }
 
-        return new ErrorOr<List<StreamItem>>(store);
+        var readOrError = ReadEventsIntoLedgerOrError(ledgerFilename, eventsOrError.Events);
+
+        if (readOrError.Error is not null) {
+
+            WriteErrorLine(
+                !IsNullOrWhiteSpace(readOrError.Error?.Content)
+                ? $"error reading events into ledger: {readOrError.Error?.Content}"
+                : $"unknown error reading events into ledger");
+
+            return 1;
+        }
+
+        WriteLine($"Read {readOrError.Value} transaction(s)");
+
+        return 0;
     }
 
     ///
@@ -231,7 +424,6 @@ public static partial class Program {
     public static int Main(String[] args) {
 
         var ledgerFilename = args.ValueForKey("--ledger") ?? "./Store/ledger.json";
-        // var ledgerFilename = args.ValueForKey("--ledger") ?? "./ledger.json";
 
         ///
 
@@ -247,63 +439,86 @@ public static partial class Program {
                     return 1;
                 }
 
-                var (events, err) = GetStreamEventsFromFilename(filename);
-
-                if (err is not null) {
-
-                    WriteErrorLine(err.Content ?? "unknown error");
-
-                    return 1;
-                }
-
-                ReadEventsIntoLedger(ledgerFilename, events);
-
-                return 0;
+                return ReadEventsIntoLedger(ledgerFilename, GetStreamEventsFromFilename(filename));
             }
 
             case var _ when
                 args.ValueForKey("--read-inline") is String inline: {
 
-                var (events, err) = GetStreamEventsFromContents(inline);
+                return ReadEventsIntoLedger(ledgerFilename, GetStreamEventsFromContents(inline));
+            }
 
-                if (err is not null) {
+            case var _ when
+                args.ValueForKey("--nft") is String tokenId: {
 
-                    WriteErrorLine(err.Content ?? "unknown error");
+                var ledgerOrError = OpenOrCreateLedger(ledgerFilename);
+
+                if (ledgerOrError.Error is not null) {
+
+                    WriteLine($"error opening ledger file '{ledgerFilename}'");
 
                     return 1;
                 }
 
-                ReadEventsIntoLedger(ledgerFilename, events);
+                var (_, ledger) = ledgerOrError.Value;
 
-                return 0;
-            }
+                ///
 
-            case var _ when
-                args.ValueForKey("--nft") is String nftId: {
+                if (ledger.ContainsKey(tokenId)) {
 
-                // TODO: id validation?
-                
-                WriteLine($"TODO: nft id");
+                    WriteLine($"Token {tokenId} is owned by {ledger[tokenId]}");
+                }
+                else {
+
+                    WriteLine($"Token {tokenId} is not owned by any wallet");
+                }
 
                 return 0;
             }
 
             case var _ when
                 args.ValueForKey("--wallet") is String address: {
-                
-                // TODO: address validation?
 
-                WriteLine($"TODO: wallet address");
+                var ledgerOrError = OpenOrCreateLedger(ledgerFilename);
+
+                if (ledgerOrError.Error is not null) {
+
+                    WriteLine($"error opening ledger file '{ledgerFilename}'");
+
+                    return 1;
+                }
+
+                var (_, ledger) = ledgerOrError.Value;
+
+                ///
+
+                var entries = ledger
+                    .Where(x => x.Value == address)
+                    .ToList();
+
+                if (!entries.Any()) {
+
+                    WriteLine($"Wallet {address} holds no Tokens");
+                }
+                else {
+
+                    WriteLine($"Wallet {address} holds {entries.Count} Token{(entries.Count == 1 ? "" : "s")}:");
+                }
+
+                foreach (var entry in entries) {
+
+                    WriteLine(entry.Key);
+                }
 
                 return 0;
             }
 
             case var _ when
                 args.ValueForKey("--reset") is String address: {
-                
-                // TODO: address validation?
 
-                WriteLine($"TODO: reset");
+                ResetStream(ledgerFilename);
+                
+                WriteLine($"Program was reset");
 
                 return 0;
             }

@@ -43,26 +43,26 @@ public partial class ErrorOr<Result> {
     }
 }
 
-public class ErrorOrVoid {
+// public class ErrorOrVoid {
 
-    public Error? Error { get; init; }
+//     public Error? Error { get; init; }
 
-    ///
+//     ///
 
-    public ErrorOrVoid() {
+//     public ErrorOrVoid() {
 
-        this.Error = null;
-    }
+//         this.Error = null;
+//     }
 
-    public ErrorOrVoid(
-        Error e) {
+//     public ErrorOrVoid(
+//         Error e) {
 
-        this.Error = e;
-    }
+//         this.Error = e;
+//     }
 
-    public ErrorOrVoid(
-        String? content) {
+//     public ErrorOrVoid(
+//         String? content) {
 
-        this.Error = new Error(content);
-    }
-}
+//         this.Error = new Error(content);
+//     }
+// }

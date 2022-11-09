@@ -7,11 +7,8 @@
             "request": "launch",
             "program": "${workspaceFolder}/Sources/bin/Debug/net6.0/StreamProcessor.dll",
             "args": [
-                // "--read-file", "./Samples/singleTransaction.json"
-                // "--read-file", "./Samples/transactions.json",
-                // "--read-inline", "{\"Type\": \"Burn\", \"TokenId\": \"0xD000000000000000000000000000000000000000\"}",
-                // "--read-inline", "[{\"Type\": \"Burn\", \"TokenId\": \"0xE000000000000000000000000000000000000000\"}, {\"Type\": \"Burn\", \"TokenId\": \"0xF000000000000000000000000000000000000000\"}]"
-                "--read-inline", "'[{\"Type\": \"Burn\", \"TokenId\": \"0xE000000000000000000000000000000000000000\"}, {\"Type\": \"Burn\", \"TokenId\": \"0xF000000000000000000000000000000000000000\"}]'"
+                "--read-file", "./Samples/transactions.json",
+                "--read-inline", "'{\"Type\": \"Mint\", \"TokenId\": \"0xD000000000000000000000000000000000000000\", \"Address\": \"0x1000000000000000000000000000000000000000\"}'",
             ],
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
