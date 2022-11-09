@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "run",
+            "name": "usage",
             "type": "coreclr",
             "request": "launch",
             "program": "${workspaceFolder}/Sources/bin/Debug/net6.0/StreamProcessor.dll",
@@ -48,7 +48,7 @@
 
 
         {
-            "name": "step 1",
+            "name": "step 1 (--read-file transactions.json)",
             "type": "coreclr",
             "request": "launch",
             "program": "${workspaceFolder}/Sources/bin/Debug/net6.0/StreamProcessor.dll",
@@ -73,7 +73,7 @@
 
 
         {
-            "name": "step 2",
+            "name": "step 2 (--nft 0xA0...)",
             "type": "coreclr",
             "request": "launch",
             "program": "${workspaceFolder}/Sources/bin/Debug/net6.0/StreamProcessor.dll",
@@ -97,7 +97,7 @@
         },
 
         {
-            "name": "step 3",
+            "name": "step 3 (--nft 0xB0...)",
             "type": "coreclr",
             "request": "launch",
             "program": "${workspaceFolder}/Sources/bin/Debug/net6.0/StreamProcessor.dll",
@@ -121,7 +121,7 @@
         },
 
         {
-            "name": "step 4",
+            "name": "step 4 (--nft 0xC0...)",
             "type": "coreclr",
             "request": "launch",
             "program": "${workspaceFolder}/Sources/bin/Debug/net6.0/StreamProcessor.dll",
@@ -145,7 +145,7 @@
         },
 
         {
-            "name": "step 5",
+            "name": "step 5 (--nft 0xD0...)",
             "type": "coreclr",
             "request": "launch",
             "program": "${workspaceFolder}/Sources/bin/Debug/net6.0/StreamProcessor.dll",
@@ -169,7 +169,7 @@
         },
 
         {
-            "name": "step 6",
+            "name": "step 6 (--read-inline '{\"Type\": \"Mint\", \"TokenId\": \"0xD0...)",
             "type": "coreclr",
             "request": "launch",
             "program": "${workspaceFolder}/Sources/bin/Debug/net6.0/StreamProcessor.dll",
@@ -193,7 +193,7 @@
         },
 
         {
-            "name": "step 7",
+            "name": "step 7 (--nft 0xD0...)",
             "type": "coreclr",
             "request": "launch",
             "program": "${workspaceFolder}/Sources/bin/Debug/net6.0/StreamProcessor.dll",
@@ -217,7 +217,7 @@
         },
 
         {
-            "name": "step 8",
+            "name": "step 8 (--wallet 0x30...)",
             "type": "coreclr",
             "request": "launch",
             "program": "${workspaceFolder}/Sources/bin/Debug/net6.0/StreamProcessor.dll",
@@ -241,7 +241,7 @@
         },
 
         {
-            "name": "step 9",
+            "name": "step 9 (--reset)",
             "type": "coreclr",
             "request": "launch",
             "program": "${workspaceFolder}/Sources/bin/Debug/net6.0/StreamProcessor.dll",
@@ -265,7 +265,7 @@
         },
 
         {
-            "name": "step 10",
+            "name": "step 10 (--wallet 0x30...)",
             "type": "coreclr",
             "request": "launch",
             "program": "${workspaceFolder}/Sources/bin/Debug/net6.0/StreamProcessor.dll",

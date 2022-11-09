@@ -15,3 +15,5 @@ Serialization to/from disk is done via System.Text.Json. This is a quick and dir
 On error handling, no exceptions are used. Instead, The functional abstractions of `Error/Error?` and `ErrorOr<Result>` are used. This allows all failure scenarios to 'bubble up' to the caller.
 
 I have also specified an override for the ledger file location using `--ledger FILE`. The default is stored at `./Store/ledger.json`, which is created on first run if need be.
+
+Please check ./Docs/HOW-TO-RUN.md for run instructions. You should also be able run Steps 1-10 via VSCode's 'Run and Debug'.

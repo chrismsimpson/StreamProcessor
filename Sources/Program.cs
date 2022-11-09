@@ -3,15 +3,30 @@ namespace StreamProcessor;
 
 public static partial class Program {
 
-    public static String? ValueForKey(
+    public static bool ContainsAny(
         this String[] args,
-        String key) {
+        params String[] keys) {
+
+        foreach (var arg in args) {
+
+            if (keys.Contains(arg)) {
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static String? ValueForKeys(
+        this String[] args,
+        params String[] keys) {
 
         for (var index = 0; index < args.Length; index++) {
 
             var arg = args[index];
 
-            if (arg != key) {
+            if (!keys.Contains(arg)) {
 
                 continue;
             }
@@ -423,14 +438,14 @@ public static partial class Program {
 
     public static int Main(String[] args) {
 
-        var ledgerFilename = args.ValueForKey("--ledger") ?? "./Store/ledger.json";
+        var ledgerFilename = args.ValueForKeys("-ledger", "--ledger") ?? "./Store/ledger.json";
 
         ///
 
         switch (true) {
 
             case var _ when
-                args.ValueForKey("--read-file") is String filename: {
+                args.ValueForKeys("-read-file", "--read-file") is String filename: {
 
                 if (!File.Exists(filename)) {
 
@@ -443,13 +458,13 @@ public static partial class Program {
             }
 
             case var _ when
-                args.ValueForKey("--read-inline") is String inline: {
+                args.ValueForKeys("-read-inline", "--read-inline") is String inline: {
 
                 return ReadEventsIntoLedger(ledgerFilename, GetStreamEventsFromContents(inline));
             }
 
             case var _ when
-                args.ValueForKey("--nft") is String tokenId: {
+                args.ValueForKeys("-nft", "--nft") is String tokenId: {
 
                 var ledgerOrError = OpenOrCreateLedger(ledgerFilename);
 
@@ -477,7 +492,7 @@ public static partial class Program {
             }
 
             case var _ when
-                args.ValueForKey("--wallet") is String address: {
+                args.ValueForKeys("-wallet", "--wallet") is String address: {
 
                 var ledgerOrError = OpenOrCreateLedger(ledgerFilename);
 
@@ -514,7 +529,7 @@ public static partial class Program {
             }
 
             case var _ when
-                args.Contains("--reset"): {
+                args.ContainsAny("-reset", "--reset"): {
 
                 ResetStream(ledgerFilename);
                 
