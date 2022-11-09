@@ -181,7 +181,7 @@ public sealed class Transfer: IStreamEvent {
 
         this.TokenId = tokenId;
         this.From = from;
-        this.To = tokenId;
+        this.To = to;
     }
 }
 

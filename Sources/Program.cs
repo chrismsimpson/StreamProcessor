@@ -514,7 +514,7 @@ public static partial class Program {
             }
 
             case var _ when
-                args.ValueForKey("--reset") is String address: {
+                args.Contains("--reset"): {
 
                 ResetStream(ledgerFilename);
                 
