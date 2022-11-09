@@ -525,10 +525,21 @@ public static partial class Program {
             
             default: {
 
-                WriteLine($"TODO: write usage line");
+                WriteLine(USAGE);
 
                 return 1;
             }
         }
     }
+
+    public static readonly String USAGE = 
+@"usage: sp [task]
+
+Tasks:
+  --read-inline INLINE          Read inline events into ledger
+  --read-file FILE              Read events in file into ledger
+  --nft TOKENID                 Display owner of TOKENID
+  --wallet ADDRESS              Display contents of wallet ADDRESS
+  --reset                       Reset the ledger
+";
 }
