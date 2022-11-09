@@ -1,7 +1,7 @@
 
 namespace StreamProcessor;
 
-public class Error {
+public sealed class Error {
 
     public String? Content { get; init; }
 
@@ -16,7 +16,7 @@ public class Error {
 
 ///
 
-public partial class ErrorOr<Result> {
+public sealed class ErrorOr<Result> {
 
     public Result? Value { get; init; }
 
@@ -42,27 +42,3 @@ public partial class ErrorOr<Result> {
         this.Error = new Error(content);
     }
 }
-
-// public class ErrorOrVoid {
-
-//     public Error? Error { get; init; }
-
-//     ///
-
-//     public ErrorOrVoid() {
-
-//         this.Error = null;
-//     }
-
-//     public ErrorOrVoid(
-//         Error e) {
-
-//         this.Error = e;
-//     }
-
-//     public ErrorOrVoid(
-//         String? content) {
-
-//         this.Error = new Error(content);
-//     }
-// }

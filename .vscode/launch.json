@@ -32,6 +32,261 @@
                 "threadExit": false
             },
             "requireExactSource": true
-        }
+        },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        {
+            "name": "step 1",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "${workspaceFolder}/Sources/bin/Debug/net6.0/StreamProcessor.dll",
+            "args": [
+                "--read-file", "./Samples/transactions.json",
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "stopAtEntry": false,
+            "logging": {
+                "moduleLoad": false,
+                "engineLogging": false,
+                "elapsedTiming": false,
+                "exceptions": true,
+                "processExit": true,
+                "programOutput": true,
+                "threadExit": false
+            },
+            "requireExactSource": true
+        },
+
+
+        {
+            "name": "step 2",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "${workspaceFolder}/Sources/bin/Debug/net6.0/StreamProcessor.dll",
+            "args": [
+                "--nft", "0xA000000000000000000000000000000000000000",
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "stopAtEntry": false,
+            "logging": {
+                "moduleLoad": false,
+                "engineLogging": false,
+                "elapsedTiming": false,
+                "exceptions": true,
+                "processExit": true,
+                "programOutput": true,
+                "threadExit": false
+            },
+            "requireExactSource": true
+        },
+
+        {
+            "name": "step 3",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "${workspaceFolder}/Sources/bin/Debug/net6.0/StreamProcessor.dll",
+            "args": [
+                "--nft", "0xB000000000000000000000000000000000000000",
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "stopAtEntry": false,
+            "logging": {
+                "moduleLoad": false,
+                "engineLogging": false,
+                "elapsedTiming": false,
+                "exceptions": true,
+                "processExit": true,
+                "programOutput": true,
+                "threadExit": false
+            },
+            "requireExactSource": true
+        },
+
+        {
+            "name": "step 4",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "${workspaceFolder}/Sources/bin/Debug/net6.0/StreamProcessor.dll",
+            "args": [
+                "--nft", "0xC000000000000000000000000000000000000000",
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "stopAtEntry": false,
+            "logging": {
+                "moduleLoad": false,
+                "engineLogging": false,
+                "elapsedTiming": false,
+                "exceptions": true,
+                "processExit": true,
+                "programOutput": true,
+                "threadExit": false
+            },
+            "requireExactSource": true
+        },
+
+        {
+            "name": "step 5",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "${workspaceFolder}/Sources/bin/Debug/net6.0/StreamProcessor.dll",
+            "args": [
+                "--nft", "0xD000000000000000000000000000000000000000"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "stopAtEntry": false,
+            "logging": {
+                "moduleLoad": false,
+                "engineLogging": false,
+                "elapsedTiming": false,
+                "exceptions": true,
+                "processExit": true,
+                "programOutput": true,
+                "threadExit": false
+            },
+            "requireExactSource": true
+        },
+
+        {
+            "name": "step 6",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "${workspaceFolder}/Sources/bin/Debug/net6.0/StreamProcessor.dll",
+            "args": [
+                "--read-inline", "'{\"Type\": \"Mint\", \"TokenId\": \"0xD000000000000000000000000000000000000000\", \"Address\": \"0x1000000000000000000000000000000000000000\"}'",
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "stopAtEntry": false,
+            "logging": {
+                "moduleLoad": false,
+                "engineLogging": false,
+                "elapsedTiming": false,
+                "exceptions": true,
+                "processExit": true,
+                "programOutput": true,
+                "threadExit": false
+            },
+            "requireExactSource": true
+        },
+
+        {
+            "name": "step 7",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "${workspaceFolder}/Sources/bin/Debug/net6.0/StreamProcessor.dll",
+            "args": [
+                "--nft", "0xD000000000000000000000000000000000000000"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "stopAtEntry": false,
+            "logging": {
+                "moduleLoad": false,
+                "engineLogging": false,
+                "elapsedTiming": false,
+                "exceptions": true,
+                "processExit": true,
+                "programOutput": true,
+                "threadExit": false
+            },
+            "requireExactSource": true
+        },
+
+        {
+            "name": "step 8",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "${workspaceFolder}/Sources/bin/Debug/net6.0/StreamProcessor.dll",
+            "args": [
+                "--wallet", "0x3000000000000000000000000000000000000000"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "stopAtEntry": false,
+            "logging": {
+                "moduleLoad": false,
+                "engineLogging": false,
+                "elapsedTiming": false,
+                "exceptions": true,
+                "processExit": true,
+                "programOutput": true,
+                "threadExit": false
+            },
+            "requireExactSource": true
+        },
+
+        {
+            "name": "step 9",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "${workspaceFolder}/Sources/bin/Debug/net6.0/StreamProcessor.dll",
+            "args": [
+                "--reset"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "stopAtEntry": false,
+            "logging": {
+                "moduleLoad": false,
+                "engineLogging": false,
+                "elapsedTiming": false,
+                "exceptions": true,
+                "processExit": true,
+                "programOutput": true,
+                "threadExit": false
+            },
+            "requireExactSource": true
+        },
+
+        {
+            "name": "step 10",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "${workspaceFolder}/Sources/bin/Debug/net6.0/StreamProcessor.dll",
+            "args": [
+                "--wallet", "0x3000000000000000000000000000000000000000"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "stopAtEntry": false,
+            "logging": {
+                "moduleLoad": false,
+                "engineLogging": false,
+                "elapsedTiming": false,
+                "exceptions": true,
+                "processExit": true,
+                "programOutput": true,
+                "threadExit": false
+            },
+            "requireExactSource": true
+        },
+
     ]
 }
